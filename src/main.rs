@@ -18,22 +18,6 @@ fn main() {
 
     implement_vertex!(Vertex, position);
 
-    let vertex1 = Vertex {
-        position: [-0.5, -0.5],
-    };
-
-    let vertex2 = Vertex {
-        position: [0.5, -0.25],
-    };
-
-    let vertex3 = Vertex {
-        position: [0., 0.5],
-    };
-
-    let shape = vec![vertex1, vertex2, vertex3];
-
-    let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
-
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
     let vertex_shader_src = r#"
@@ -59,17 +43,49 @@ fn main() {
         glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
             .unwrap();
 
-    events_loop.run(move |ev, _, control_flow| {
+    let mut t = -0.5;
+    events_loop.run(move |event, _, control_flow| {
+        match event {
+            glutin::event::Event::WindowEvent { event, .. } => {
+                if let glutin::event::WindowEvent::CloseRequested = event {
+                    *control_flow = glutin::event_loop::ControlFlow::Exit;
+                    return;
+                }
+                return;
+            }
+            glutin::event::Event::NewEvents(cause) => match cause {
+                glutin::event::StartCause::ResumeTimeReached { .. } => (),
+                glutin::event::StartCause::Init => (),
+                _ => return,
+            },
+            _ => return,
+        }
+
         // Setting the event loop to 60 FPS fallback
         let next_frame_time =
             std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
-        if let glutin::event::Event::WindowEvent { event, .. } = ev {
-            if event == glutin::event::WindowEvent::CloseRequested {
-                *control_flow = glutin::event_loop::ControlFlow::Exit;
-            }
+        t += 0.0032;
+        if t > 0.5 {
+            t = -0.5;
         }
+
+        let vertex1 = Vertex {
+            position: [-0.5 + t, -0.5],
+        };
+
+        let vertex2 = Vertex {
+            position: [0.5 + t, -0.25],
+        };
+
+        let vertex3 = Vertex {
+            position: [0. + t, 0.5],
+        };
+
+        let shape = vec![vertex1, vertex2, vertex3];
+
+        let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
 
         let mut target = display.draw();
         target.clear_color(0., 0., 1., 1.);
