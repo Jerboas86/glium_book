@@ -1,3 +1,5 @@
+use glium::Surface;
+
 #[macro_use]
 extern crate glium;
 
@@ -8,6 +10,10 @@ fn main() {
     let wb = glutin::window::WindowBuilder::new();
     let cb = glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &events_loop).expect("display building failed");
+
+    let mut target = display.draw();
+    target.clear_color(0., 0., 1., 1.);
+    target.finish().unwrap();
 
     events_loop.run(move |ev, _, control_flow| {
         // Setting the event loop to 60 FPS fallback
