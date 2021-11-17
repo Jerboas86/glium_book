@@ -41,12 +41,10 @@ fn main() {
 
     in vec2 position;
 
-    uniform float t;
+    uniform mat4 matrix;
 
     void main() {
-        vec2 pos = position;
-        pos.x += t;
-        gl_Position = vec4(pos, 0.0, 1.0 );
+        gl_Position = matrix * vec4(position, 0.0, 1.0 );
     }
     "#;
 
@@ -91,6 +89,14 @@ fn main() {
             std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
+        let uniform = uniform! {
+        matrix: [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [ t , 0.0, 0.0, 1.0f32]
+        ]};
+
         let mut target = display.draw();
         target.clear_color(0., 0., 1., 1.);
         target
@@ -98,7 +104,7 @@ fn main() {
                 &vertex_buffer,
                 &indices,
                 &program,
-                &uniform! {t:t},
+                &uniform,
                 &Default::default(),
             )
             .unwrap();
