@@ -118,6 +118,7 @@ fn main() {
                 write: true,
                 ..Default::default()
             },
+            backface_culling: glium::BackfaceCullingMode::CullClockwise,
             ..Default::default()
         };
 
